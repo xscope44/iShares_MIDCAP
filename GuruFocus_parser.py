@@ -15,17 +15,7 @@
 # Run read_iShares_excel to generate clean Ticker excel
 # Run this GuruFocus_parser to parse data from GuruFocus
 
-# import pandas as pd
-# import requests
-# from bs4 import BeautifulSoup
-# import re
-# import os
-# import csv
-# from datetime import date, datetime
-# from alive_progress import alive_bar
-# import time
-# import config
-
+import os
 import sys
 import pandas as pd
 import csv
@@ -50,6 +40,9 @@ current_date = date.today().strftime("%Y%m%d")
 output_file = f"{file_output_prefix}_{current_date}.xlsx"
 csv_file = f"{file_output_prefix}_{current_date}.csv"
 
+csv_file_path = os.path.join(folder_path, csv_file)
+output_file_path = os.path.join(folder_path, output_file)
+
 def sanitize(s):
     out = s
     # Fill this up with whatever additional meta characters you need to escape
@@ -68,11 +61,11 @@ print(f"{symbols[:13]}...")
 
 # Check if CSV file exists
 try:
-    df_output = pd.read_csv(csv_file)
+    df_output = pd.read_csv(csv_file_path)
 except FileNotFoundError:
     # Create an empty DataFrame if the CSV file doesn't exist
     df_output = pd.DataFrame(columns=ls)
-    df_output.to_csv(csv_file, mode='a', index=False)
+    df_output.to_csv(csv_file_path, mode='a', index=False)
 
 
 # Determine the start index for parsing
@@ -113,7 +106,7 @@ with alive_bar(i, force_tty=True) as bar:
             scores.append(score)
         
         df_output.loc[len(df_output)] = scores
-        with open(csv_file, 'a', newline='') as csvfile:
+        with open(csv_file_path, 'a', newline='') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(scores)
         bar()
@@ -121,5 +114,5 @@ with alive_bar(i, force_tty=True) as bar:
 print("\nProcessing is complete.")
 
 # Export the scraped data to Excel file
-df_output.to_excel(output_file, index=False)
-print(f"Data were saved to file: {output_file}\n")
+df_output.to_excel(output_file_path, index=False)
+print(f"Data were saved to file: {output_file_path}\n")

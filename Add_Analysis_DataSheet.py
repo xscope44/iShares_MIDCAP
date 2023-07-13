@@ -1,6 +1,6 @@
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
-from progress.bar import ShadyBar
+from alive_progress import alive_bar
 import config
 
 folder_path = config.folder_path
@@ -115,19 +115,18 @@ else:
     existing_sheet = existing_workbook[gurufocus_sheet_name]
         # Get the column letter for the 9th column in the first sheet
     max_col = existing_sheet.max_column
-    print(max_col)
-    bar = ShadyBar('Processing', max=max_col)
-    for i in range(2,max_col):
-        column_letter_2th = get_column_letter(i)
-        # Copy the 9th column from the first sheet to the new sheet
-        # Get the column letter for the new column
-        new_column_letter = get_column_letter(new_sheet.max_column + 1)
-        new_sheet[new_column_letter + "1"] = "ETF Price"
-        for row in range(1, existing_sheet.max_row + 1):
-            cell = existing_sheet[column_letter_2th + str(row)]
-            new_sheet.cell(row=row, column=new_sheet.max_column, value=cell.value)
-        bar.next()
+    # print(max_col)
+    with alive_bar(max_col-2, force_tty=True) as bar:
+        for i in range(2,max_col):
+            column_letter_2th = get_column_letter(i)
+            # Copy the 9th column from the first sheet to the new sheet
+            # Get the column letter for the new column
+            new_column_letter = get_column_letter(new_sheet.max_column + 1)
+            new_sheet[new_column_letter + "1"] = "ETF Price"
+            for row in range(1, existing_sheet.max_row + 1):
+                cell = existing_sheet[column_letter_2th + str(row)]
+                new_sheet.cell(row=row, column=new_sheet.max_column, value=cell.value)
+            bar()
 
-    bar.finish()
     # Save the changes to the existing file
     existing_workbook.save(ishares_out_file)

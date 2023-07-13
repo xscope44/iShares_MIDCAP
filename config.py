@@ -1,4 +1,4 @@
-folder_path = "."  # Use the current folder as the source folder
+folder_path = "./Data"  # Use the current folder as the source folder
 
 ishares_russell_midcap_etf_url = 'https://www.ishares.com/us/products/239718/ishares-russell-midcap-etf/1521942788811.ajax?fileType=xls&fileName=iShares-Russell-Mid-Cap-ETF_fund&dataType=fund'
 
