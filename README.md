@@ -1,17 +1,30 @@
-# iShares_MIDCAP<br>
-GuruFocus parsing of iShares-Russell-Mid-Cap-ETF Holdings Tickers Data<br><br>
+GuruFocus Parsing of iShares-Russell-Mid-Cap-ETF Holdings Tickers Data
+This repository contains a script that facilitates parsing and analyzing the holdings data of iShares Russell Mid-Cap ETF using GuruFocus. The script allows you to download the Excel data of the fund, convert it to CSV format, and perform various data manipulation tasks.
 
-Download excel data of iShares-Russell-Mid-Cap-ETF_fund to csv<br>
-https://www.blackrock.com/us/individual/products/239718/ishares-russell-midcap-etf<br>
-Converting downloaded Mid-Cap-ETF csv to excel<br>
-Creating new excel file _Out to merge all gathered data and to make Analysis later.<br>
-Copy Holdings data sheet to new excel iShares-Russell-Mid-Cap-ETF_Out with sheet name iShares-Russell-Mid-Cap-ETF<br>
-Parsing GF Data to new excel sheet from GuruFocus<br>
-Merging all data in new excel sheet for manual filter Analysis<br>
-Adding googlefinance functions, used in google sheets, to get 6 month rps momentum and current price for comparison<br>
+Instructions
+Download the Excel data of iShares Russell Mid-Cap ETF from the following link:
+iShares Russell Mid-Cap ETF
 
-Required modules:<br>
- pip3 install pandas openpyxl bs4 simplified_scrapy<br>
- pip3 install progress progressbar2 alive-progress tqdm<br>
+Convert the downloaded Mid-Cap-ETF file to CSV format.
 
-Tested on Windows and Mac<br>
+Create a new Excel file named _Out to merge all the gathered data and enable further analysis.
+
+Copy the "Holdings" data sheet from the original Excel file to the newly created Excel file (iShares-Russell-Mid-Cap-ETF_Out), ensuring that the sheet name is set as "iShares-Russell-Mid-Cap-ETF".
+
+Parse the GuruFocus data and populate it into a new sheet within the Excel file.
+
+Merge all the data in the new Excel sheet for manual filter analysis.
+
+Optionally, add Google Finance functions to your Google Sheets using the googlefinance library. These functions can help you retrieve 6-month RPS momentum and current price data for comparison.
+
+Required Modules
+Ensure that the following Python modules are installed:
+
+shell
+Copy code
+pip3 install pandas openpyxl bs4 simplified_scrapy
+pip3 install progress progressbar2 alive-progress tqdm
+Compatibility
+This script has been tested on both Windows and Mac operating systems.
+
+Feel free to explore and modify the code to suit your specific needs. Happy analyzing!
