@@ -20,8 +20,7 @@ Optionally, add Google Finance functions to your Google Sheets using the googlef
 Required Modules
 Ensure that the following Python modules are installed:
 
-shell
-Copy code
+
 ```python
 pip3 install pandas openpyxl bs4 simplified_scrapy
 pip3 install progress progressbar2 alive-progress tqdm
