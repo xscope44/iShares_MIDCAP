@@ -1,7 +1,7 @@
-**GuruFocus Parsing of iShares-Russell-Mid-Cap-ETF Holdings Tickers Data
-**This repository contains a script that facilitates parsing and analyzing the holdings data of iShares Russell Mid-Cap ETF using GuruFocus. The script allows you to download the Excel data of the fund, convert it to CSV format, and perform various data manipulation tasks.
+# GuruFocus Parsing of iShares-Russell-Mid-Cap-ETF Holdings Tickers Data
+This repository contains a script that facilitates parsing and analyzing the holdings data of iShares Russell Mid-Cap ETF using GuruFocus. The script allows you to download the Excel data of the fund, convert it to CSV format, and perform various data manipulation tasks.
 
-Instructions
+# Instructions
 Download the Excel data of iShares Russell Mid-Cap ETF from the following link:
 iShares Russell Mid-Cap ETF
 
