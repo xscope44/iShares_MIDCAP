@@ -111,8 +111,8 @@ with alive_bar(i, force_tty=True) as bar:
                     
                 else:
                     score = 0
-                
-            print(f"GF Value score: {score}!")   
+                # print(f"GF Value score: {score}!")     
+              
             scores.append(score)
             
         # print(len(df_output))
