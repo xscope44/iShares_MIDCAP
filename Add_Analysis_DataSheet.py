@@ -41,7 +41,7 @@ else:
 
     # Apply the formula to the new column
     
-    for row in range(2, new_sheet.max_row + 1):
+    for row in range(2, 3):
         formula = f'=INDEX(GoogleFinance(A{row},"price",TODAY()),2,2)'
         cell = new_sheet[new_column_letter + str(row)]
         cell.value = formula
@@ -57,7 +57,7 @@ else:
     new_sheet[new_column_letter + "1"] = six_month_price_column_name
 
     # Apply the formula to the new column
-    for row in range(2, new_sheet.max_row + 1):
+    for row in range(2, 3):
         formula = f'=INDEX(GoogleFinance(A{row},"close",TODAY()-180),2,2)'
         cell = new_sheet[new_column_letter + str(row)]
         cell.value = formula

@@ -90,16 +90,18 @@ import csv
 
 #  automatically adjusts the skiprows parameter based on the first occurrence of the keyword "Ticker" in the CSV file
 def convert_csv_to_excel(csv_file, excel_file, sheet_name='Sheet1'):
-    # Read the CSV file to determine the skiprows value
+    # Read the CSV file to determine the skiprows value and the skipped rows
+    skipped_rows = []
     with open(csv_file, 'r') as file:
         reader = csv.reader(file)
         skiprows = 0
         for row in reader:
             if 'Ticker' in row:
                 break
+            skipped_rows.append(row)
             skiprows += 1
-    print(skiprows)
-    # Read the CSV file into a pandas DataFrame
+    
+    # Read the CSV file into a pandas DataFrame without skipped rows
     df = pd.read_csv(csv_file, skiprows=skiprows)
 
     # Create an Excel writer object
@@ -107,6 +109,11 @@ def convert_csv_to_excel(csv_file, excel_file, sheet_name='Sheet1'):
 
     # Write the DataFrame to the Excel file
     df.to_excel(writer, sheet_name=sheet_name, index=False)
+
+    # Save the skipped rows to an "Info" sheet
+    info_sheet_name = 'Info'
+    skipped_df = pd.DataFrame(skipped_rows)
+    skipped_df.to_excel(writer, sheet_name=info_sheet_name, index=False)
 
     # Save the changes and close the writer
     writer._save()

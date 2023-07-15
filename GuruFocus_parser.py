@@ -96,16 +96,40 @@ with alive_bar(i, force_tty=True) as bar:
             # GF Value
             if val == 'GF Value':
                 score2 = soup.select('h2 > a', class_="t-h6", string=re.compile(val))
+                i=0
                 for xt in score2:
                     gf_value = xt.text.strip()
+                    # print(f"GF Value gf_value: {gf_value}!")
                     if gf_value.find(val) != -1:
                         gf_value2 = gf_value.split('\n')
-                gf_value = [x.replace(' ','') for x in gf_value2]
-                score = gf_value[1].replace('$','')
-
+                        # print(f"GF Value gf_value2: {gf_value2}!")
+                        i+=1
+                if i>0:
+                    gf_value = [x.replace(' ','') for x in gf_value2]
+                    score = gf_value[1].replace('$','')
+                    score = float(score)
+                    
+                else:
+                    score = 0
+                
+            print(f"GF Value score: {score}!")   
             scores.append(score)
+            
+        # print(len(df_output))
+        df_len = len(df_output)
+        # print(df_output['GF Value'].loc[df_len-1])
+        # gfvalue1 = df_output['GF Value'].loc[df_len-1]
         
-        df_output.loc[len(df_output)] = scores
+        # df_output.loc[len(df_output)] = scores
+        
+        # df_len = len(df_output)
+        # gfvalue2 = df_output['GF Value'].loc[df_len-1]
+      
+        # if gfvalue1 == gf_value2:
+        #     print('Warning!')
+        #     print(df_output['Ticker'].loc[df_len-1])
+        #     print(df_output['GF Value'].loc[df_len-1]) 
+        df_output['GF Value'].diff().eq(0)
         with open(csv_file_path, 'a', newline='') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(scores)
