@@ -30,7 +30,7 @@
 import sys
 
 # List of script file names to include
-script_files = ["read_iShares_excel.py", "GuruFocus_parser.py", "Add_GF_DataSheet.py", "Add_Analysis_DataSheet.py"]
+script_files = ["Download_iShares_midcap_data.py", "GuruFocus_parser.py", "Add_GF_DataSheet.py", "Add_Analysis_DataSheet.py"]
 
 # Configuration variable to skip prompt questions
 skip_prompt = False
