@@ -130,3 +130,5 @@ else:
 
     # Save the changes to the existing file
     existing_workbook.save(ishares_out_file)
+    existing_workbook.close(ishares_out_file)
+    
