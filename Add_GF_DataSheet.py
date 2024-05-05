@@ -34,4 +34,4 @@ for row in source_sheet.iter_rows(values_only=True):
 
 # Save the changes to the existing file
 existing_workbook.save(file_ishares_out)
-existing_workbook.close(file_ishares_out)
+existing_workbook.close()

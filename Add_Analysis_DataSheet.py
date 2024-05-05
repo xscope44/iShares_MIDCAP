@@ -42,7 +42,8 @@ else:
     # Apply the formula to the new column
     
     for row in range(2, 3):
-        formula = f'=INDEX(GoogleFinance(A{row},"price",TODAY()),2,2)'
+        # formula = f'=INDEX(GoogleFinance(A{row},"price",TODAY()),2,2)'
+        formula = f'=IFNA(INDEX(GoogleFinance(A{row}; "close"; TODAY()); 2; 2); IFNA(INDEX(GoogleFinance(A{row}; "close"; TODAY()-1); 2; 2); IFNA(INDEX(GoogleFinance(A{row}; "close"; TODAY()-2); 2; 2); IFNA(INDEX(GoogleFinance(A{row}; "close"; TODAY()-3); 2; 2); IFNA(INDEX(GoogleFinance(A{row}; "close"; TODAY()-4); 2; 2); INDEX(GoogleFinance(A{row}; "close"; TODAY()-5); 2; 2))))))'
         cell = new_sheet[new_column_letter + str(row)]
         cell.value = formula
 
@@ -58,7 +59,8 @@ else:
 
     # Apply the formula to the new column
     for row in range(2, 3):
-        formula = f'=INDEX(GoogleFinance(A{row},"close",TODAY()-180),2,2)'
+        formula = f'=IFNA(INDEX(GoogleFinance(A{row};"close";TODAY()-180);2;2); IFNA(INDEX(GoogleFinance(A{row};"close";TODAY()-181);2;2); IFNA(INDEX(GoogleFinance(A{row};"close";TODAY()-179);2;2); INDEX(GoogleFinance(A{row};"close";TODAY()-182);2;2))))'
+        
         cell = new_sheet[new_column_letter + str(row)]
         cell.value = formula
 
@@ -130,5 +132,4 @@ else:
 
     # Save the changes to the existing file
     existing_workbook.save(ishares_out_file)
-    existing_workbook.close(ishares_out_file)
-    
+    existing_workbook.close()

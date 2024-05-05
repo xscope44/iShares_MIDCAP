@@ -1,18 +1,20 @@
-folder_path = "./Data"  # Use the current folder as the source folder
+folder_path = ".\Data"  # Use the current folder as the source folder
 
-ishares_russell_midcap_etf_url = 'https://www.ishares.com/us/products/239718/ishares-russell-midcap-etf/1521942788811.ajax?fileType=xls&fileName=iShares-Russell-Mid-Cap-ETF_fund&dataType=fund'
-
-file_ishares_init_prefix = "iShares-Russell-Mid-Cap-ETF_fund"
-file_ishares_out_prefix = "iShares-Russell-Mid-Cap-ETF_Out"
-
-file_gurufocus_prefix = "iShares-Russell-Mid-Cap-ETF_Guru"
+ishares_russell_midcap_etf_url = 'https://www.blackrock.com/us/individual/products/239718/ishares-russell-midcap-etf/1515394931018.ajax?fileType=xls&fileName=iShares-Russell-Mid-Cap-ETF_fund&dataType=fund'
+ishares_russell_midcap_value_etf_url = 'https://www.ishares.com/ch/professionals/en/products/239719/ishares-russell-midcap-value-etf/1535604580403.ajax?fileType=xls&fileName=iShares-Russell-Mid-Cap-Value-ETF_fund&dataType=fund'
+file_ishares_init_prefix = "iShares-Russell-Mid-Cap-Value-ETF_fund"
+file_ishares_out_prefix = "iShares-Russell-Mid-Cap-Value-ETF_Out"
+file_gurufocus_prefix = "iShares-Russell-Mid-Cap-Value-ETF_Guru"
 file_gurufocus_attributes = 'GuruFocus_attributes.xlsx'
+
+csv_file_manual = 'iShares-Russell-Mid-Cap-ETF_fund_20240428.csv'
+manual_download = False
 
 file_ishares_init_extension = ".xls"
 file_ishares_out_extension = ".xlsx"
 
 ishares_holdings_sheet_name = "Holdings"
-ishares_out_sheet_name = "iShares-Russell-Mid-Cap-ETF"
+ishares_out_sheet_name = "Mid-Cap-Value-ETF"
 gf_sheet_name = "Sheet1"  # Name of the sheet to import
 ishares_gurufocus_sheet_name = "GuruFocus_Data"  # New name for the imported sheet
 analysis_sheet_name = "Analysis"
@@ -21,11 +23,12 @@ six_month_price_column_name = "6M Price"
 price_column_name = "Price"
 six_month_rps_column_name = '6M RPS'
 upside_potencial_column_name = 'Upside Potencial'
-
+ticker_column_name = 'Issuer Ticker' #midcap value etf: 'Issuer Ticker', Others: 'Ticker'
 
 import os
 from datetime import datetime, date
 import pandas as pd
+import csv
 
 def find_newest_file(folder_path, file_input_prefix, file_input_extension, file_output_prefix, file_out_extension, input_sheet_name):
     # Get a list of files matching the criteria
@@ -85,9 +88,6 @@ def find_newest_file_simple(folder_path, file_input_prefix, file_input_extension
     return source_file
 
 
-import pandas as pd
-import csv
-
 #  automatically adjusts the skiprows parameter based on the first occurrence of the keyword "Ticker" in the CSV file
 def convert_csv_to_excel(csv_file, excel_file, sheet_name='Sheet1'):
     # Read the CSV file to determine the skiprows value and the skipped rows
@@ -102,7 +102,7 @@ def convert_csv_to_excel(csv_file, excel_file, sheet_name='Sheet1'):
             skiprows += 1
     
     # Read the CSV file into a pandas DataFrame without skipped rows
-    df = pd.read_csv(csv_file, skiprows=skiprows)
+    df = pd.read_csv(csv_file,  delim_whitespace=True)
 
     # Create an Excel writer object
     writer = pd.ExcelWriter(excel_file, engine='openpyxl')

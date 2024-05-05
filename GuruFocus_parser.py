@@ -10,10 +10,28 @@
 # +--------+-------------------+----------------+-------------------+
 
 # Download Holdings Data by downloading excel from:
-# https://www.blackrock.com/us/individual/products/239718/ishares-russell-midcap-etf
+# https://www.blackrock.com/us/individual/products/239719/ishares-russell-midcap-value-etf
 # open in excel and save as excel format
 # Run read_iShares_excel to generate clean Ticker excel
 # Run this GuruFocus_parser to parse data from GuruFocus
+
+# Google does not like to be scraped directly. Instead of a simple requests.get, use a session and a post request to create initial cookies. Then, proceed with scraping.
+# Here's an example code snippet:
+
+# import requests
+# from bs4 import BeautifulSoup
+
+# with requests.Session() as s:
+    # url = "https://www.google.com/search?q=fitness+wear"
+    # headers = {
+    #     "referer": "referer: https://www.google.com/",
+    #     "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36"
+    # }
+    # s.post(url, headers=headers)
+    # response = s.get(url, headers=headers)
+    # soup = BeautifulSoup(response.text, 'html.parser')
+    # print(soup)
+# This approach allows you to scrape Google search results after handling the consent form1.
 
 import os
 import sys
@@ -26,12 +44,13 @@ import re
 from bs4 import BeautifulSoup
 from alive_progress import alive_bar
 
-folder_path = config.folder_path  # Use the current folder as the source folder
+data_folder = config.folder_path  # Use the current folder as the source folder
 file_source_prefix = config.file_ishares_out_prefix
 file_extension = config.file_ishares_out_extension
 file_output_prefix = config.file_gurufocus_prefix
 attributes_file = config.file_gurufocus_attributes
 ishares_out_sheet_name = config.ishares_out_sheet_name
+ticker = config.ticker_column_name
 
 # Generate the current date in the format "yyyymmdd"
 current_date = date.today().strftime("%Y%m%d")
@@ -40,8 +59,8 @@ current_date = date.today().strftime("%Y%m%d")
 output_file = f"{file_output_prefix}_{current_date}.xlsx"
 csv_file = f"{file_output_prefix}_{current_date}.csv"
 
-csv_file_path = os.path.join(folder_path, csv_file)
-output_file_path = os.path.join(folder_path, output_file)
+csv_file_path = os.path.join(data_folder, csv_file)
+output_file_path = os.path.join(data_folder, output_file)
 
 def sanitize(s):
     out = s
@@ -49,12 +68,12 @@ def sanitize(s):
     for meta_char in ['(', ')']:
         out = out.replace(meta_char, '\\'+meta_char)
     return out
-source_file = config.find_newest_file_simple(folder_path, file_source_prefix, file_extension)
+source_file = config.find_newest_file_simple(data_folder, file_source_prefix, file_extension)
 
 # Read the symbols and ls from Excel file
 df_input = pd.read_excel(attributes_file)
 df_symbols = pd.read_excel(source_file)
-symbols = df_symbols['Ticker'].tolist()
+symbols = df_symbols[ticker].tolist()
 ls = df_input.columns.tolist()
 print(f"{ls[:5]}...")
 print(f"{symbols[:13]}...")
@@ -79,12 +98,17 @@ print(f"Amount of Stocks to parse: {i}\n\nPlease wait, this may take a while..."
 
 with alive_bar(i, force_tty=True) as bar:
     for t in symbols[start_index:]:
-        req = requests.get("https://www.gurufocus.com/stock/" + t)
-        if req.status_code != 200:
-            continue
-        soup = BeautifulSoup(req.content, 'html.parser')
-        scores = [t]
-
+        with requests.Session() as s:
+            url = "https://gurufocus.com/stock/" + t + "/summary"
+            headers = {
+                "referer": "referer: https://www.google.com/",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36"
+            }
+            s.post(url, headers=headers)
+            response = s.get(url, headers=headers)
+            soup = BeautifulSoup(response.content, 'html.parser')
+            scores = [t]
+        
         for val in ls[1:]:
             val = sanitize(val)
             score1 = soup.find('a', string=re.compile(val))

@@ -4,7 +4,7 @@
 # Copy Holdings data sheet to new excel iShares-Russell-Mid-Cap-ETF_Out sheet name iShares-Russell-Mid-Cap-ETF
 
 # # # # # # # # GuruFocus_parser:
-# 
+# pip3 install requests
 # pip3 install pandas openpyxl bs4 simplified_scrapy
 # pip3 install progress progressbar2 alive-progress tqdm --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org
 # --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org
@@ -15,7 +15,7 @@
 # +--------+-------------------+----------------+-------------------+
 
 # Download Holdings Data by downloading excel from:
-# https://www.blackrock.com/us/individual/products/239718/ishares-russell-midcap-etf
+# https://www.blackrock.com/us/individual/products/239719/ishares-russell-midcap-value-etf
 # open in excel and save as excel format
 # Run read_iShares_excel to generate clean Ticker excel
 # Run this GuruFocus_parser to parse data from GuruFocus
@@ -57,6 +57,7 @@ def run_scripts(selection):
 
     if selection == 1:
         for script_file in script_files:
+            print(f"Running script file: {script_file}")
             include_script(script_file)
     elif 1 < selection <= len(script_files) + 1:
         script_file = script_files[selection - 2]
