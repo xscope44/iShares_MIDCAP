@@ -1,13 +1,13 @@
-folder_path = ".\Data"  # Use the current folder as the source folder
+data_folder_path = ".\Data"  # Use Data folder to download and create excel sheets and csv
 
-ishares_russell_midcap_etf_url = 'https://www.blackrock.com/us/individual/products/239718/ishares-russell-midcap-etf/1515394931018.ajax?fileType=xls&fileName=iShares-Russell-Mid-Cap-ETF_fund&dataType=fund'
-ishares_russell_midcap_value_etf_url = 'https://www.ishares.com/ch/professionals/en/products/239719/ishares-russell-midcap-value-etf/1535604580403.ajax?fileType=xls&fileName=iShares-Russell-Mid-Cap-Value-ETF_fund&dataType=fund'
-file_ishares_init_prefix = "iShares-Russell-Mid-Cap-Value-ETF_fund"
-file_ishares_out_prefix = "iShares-Russell-Mid-Cap-Value-ETF_Out"
-file_gurufocus_prefix = "iShares-Russell-Mid-Cap-Value-ETF_Guru"
-file_gurufocus_attributes = 'GuruFocus_attributes.xlsx'
+ishares_russell_midcap_etf_download_url = 'https://www.blackrock.com/us/individual/products/239718/ishares-russell-midcap-etf/1515394931018.ajax?fileType=xls&fileName=iShares-Russell-Mid-Cap-ETF_fund&dataType=fund'
+ishares_russell_midcap_value_etf_download_url = 'https://www.ishares.com/ch/professionals/en/products/239719/ishares-russell-midcap-value-etf/1535604580403.ajax?fileType=xls&fileName=iShares-Russell-Mid-Cap-Value-ETF_fund&dataType=fund'
+ishares_fund_prefix = "iShares-Russell-Mid-Cap-Value-ETF_fund"
+ishares_out_prefix = "iShares-Russell-Mid-Cap-Value-ETF_Out"
+gurufocus_prefix = "iShares-Russell-Mid-Cap-Value-ETF_Guru"
+gurufocus_attributes_xlsx = 'GuruFocus_attributes.xlsx'
 
-csv_file_manual = 'iShares-Russell-Mid-Cap-ETF_fund_20240428.csv'
+ishares_manual_fund_csv = 'iShares-Russell-Mid-Cap-ETF_fund_20240428.csv'
 manual_download = False
 
 file_ishares_init_extension = ".xls"
@@ -30,22 +30,48 @@ from datetime import datetime, date
 import pandas as pd
 import csv
 
-def find_newest_file(folder_path, file_input_prefix, file_input_extension, file_output_prefix, file_out_extension, input_sheet_name):
+def create_file_paths():
+    # Generate the current date in the format "yyyymmdd"
+    current_date = date.today().strftime("%Y%m%d")
+
+     # Construct output file names
+    output_xlsx = f"{ishares_out_prefix}_{current_date}.xlsx"
+    fund_csv = f"{ishares_fund_prefix}_{current_date}.csv"
+    output_file = f"{gurufocus_prefix}_{current_date}.xlsx"
+    csv_file = f"{gurufocus_prefix}_{current_date}.csv"
+    
+    # Join the folder path with the file names
+    ishares_fund_csv_path = os.path.join(data_folder_path, fund_csv)
+    ishares_out_xlsx_path = os.path.join(data_folder_path, output_xlsx)
+    
+    #Gurufocus
+    guru_csv_path = os.path.join(data_folder_path, csv_file)
+    guru_xlsx_path = os.path.join(data_folder_path, output_file)
+    
+    # Create the directory if it doesn't exist
+    if not os.path.exists(data_folder_path):
+        os.makedirs(data_folder_path)
+        print(f"Folder {data_folder_path} created successfully!")
+
+    return ishares_fund_csv_path, ishares_out_xlsx_path, guru_csv_path, guru_xlsx_path
+
+
+def find_newest_file(data_folder_path, file_input_prefix, file_input_extension, file_output_prefix, file_out_extension, input_sheet_name):
     # Get a list of files matching the criteria
     files = [
-        f for f in os.listdir(folder_path)
+        f for f in os.listdir(data_folder_path)
         if f.startswith(file_input_prefix) and f.endswith(file_input_extension)
     ]
 
     # Sort files by modification time in descending order
-    files.sort(key=lambda f: os.path.getmtime(os.path.join(folder_path, f)), reverse=True)
+    files.sort(key=lambda f: os.path.getmtime(os.path.join(data_folder_path, f)), reverse=True)
 
     print(f"iShares files matching criteria: \n{files}\n")
     # Get the newest file
     newest_file = files[0]
 
     # Construct the full file path
-    source_file = os.path.join(folder_path, newest_file)
+    source_file = os.path.join(data_folder_path, newest_file)
     print(f"{source_file} was identified as the newest one to parse Holdings sheet from")
 
     # Generate the current date in the format "yyyymmdd"
@@ -67,22 +93,22 @@ def find_newest_file(folder_path, file_input_prefix, file_input_extension, file_
 
     return output_file, current_date, source_file
 
-def find_newest_file_simple(folder_path, file_input_prefix, file_input_extension):
+def find_newest_file_simple(data_folder_path, file_input_prefix, file_input_extension):
     # Get a list of files matching the criteria
     files = [
-        f for f in os.listdir(folder_path)
+        f for f in os.listdir(data_folder_path)
         if f.startswith(file_input_prefix) and f.endswith(file_input_extension)
     ]
 
     # Sort files by modification time in descending order
-    files.sort(key=lambda f: os.path.getmtime(os.path.join(folder_path, f)), reverse=True)
+    files.sort(key=lambda f: os.path.getmtime(os.path.join(data_folder_path, f)), reverse=True)
 
     print(f"Newest files matching criteria: \n{files}\n")
     # Get the newest file
     newest_file = files[0]
 
     # Construct the full file path
-    source_file = os.path.join(folder_path, newest_file)
+    source_file = os.path.join(data_folder_path, newest_file)
     print(f"Newest one:\n{source_file}\n")
 
     return source_file

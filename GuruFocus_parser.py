@@ -18,9 +18,6 @@
 # Google does not like to be scraped directly. Instead of a simple requests.get, use a session and a post request to create initial cookies. Then, proceed with scraping.
 # Here's an example code snippet:
 
-# import requests
-# from bs4 import BeautifulSoup
-
 # with requests.Session() as s:
     # url = "https://www.google.com/search?q=fitness+wear"
     # headers = {
@@ -32,135 +29,123 @@
     # soup = BeautifulSoup(response.text, 'html.parser')
     # print(soup)
 # This approach allows you to scrape Google search results after handling the consent form1.
-
-import os
-import sys
 import pandas as pd
 import csv
-from datetime import date
 import config
 import requests
 import re
 from bs4 import BeautifulSoup
 from alive_progress import alive_bar
 
-data_folder = config.folder_path  # Use the current folder as the source folder
-file_source_prefix = config.file_ishares_out_prefix
-file_extension = config.file_ishares_out_extension
-file_output_prefix = config.file_gurufocus_prefix
-attributes_file = config.file_gurufocus_attributes
-ishares_out_sheet_name = config.ishares_out_sheet_name
-ticker = config.ticker_column_name
-
-# Generate the current date in the format "yyyymmdd"
-current_date = date.today().strftime("%Y%m%d")
-
-# File names
-output_file = f"{file_output_prefix}_{current_date}.xlsx"
-csv_file = f"{file_output_prefix}_{current_date}.csv"
-
-csv_file_path = os.path.join(data_folder, csv_file)
-output_file_path = os.path.join(data_folder, output_file)
+# Create file paths
+a, b, guru_csv_path, guru_xlsx_path = config.create_file_paths()
 
 def sanitize(s):
+    # Escape meta characters
     out = s
-    # Fill this up with whatever additional meta characters you need to escape
     for meta_char in ['(', ')']:
         out = out.replace(meta_char, '\\'+meta_char)
     return out
-source_file = config.find_newest_file_simple(data_folder, file_source_prefix, file_extension)
 
-# Read the symbols and ls from Excel file
-df_input = pd.read_excel(attributes_file)
-df_symbols = pd.read_excel(source_file)
-symbols = df_symbols[ticker].tolist()
+# Get the ishares out excel file
+ishares_out_excel_file = config.find_newest_file_simple(config.data_folder_path, config.ishares_out_prefix, config.file_ishares_out_extension)
+
+# Read symbols and columns from Excel files
+df_input = pd.read_excel(config.gurufocus_attributes_xlsx)
+df_symbols = pd.read_excel(ishares_out_excel_file)
+symbols = df_symbols[config.ticker_column_name].tolist()
 ls = df_input.columns.tolist()
 print(f"{ls[:5]}...")
 print(f"{symbols[:13]}...")
-
 # Check if CSV file exists
 try:
-    df_output = pd.read_csv(csv_file_path)
+    df_output = pd.read_csv(guru_csv_path)
 except FileNotFoundError:
     # Create an empty DataFrame if the CSV file doesn't exist
     df_output = pd.DataFrame(columns=ls)
-    df_output.to_csv(csv_file_path, mode='a', index=False)
-
+    df_output.to_csv(guru_csv_path, mode='a', index=False)
 
 # Determine the start index for parsing
 start_index = len(df_output)
 if start_index > 1:
     print(f"CONTINUE Parsing from index: {start_index}\n")
+
+# Initialize a counter variable 'i'
 i = 0
-for t in symbols[start_index:]:
-    i += 1
+
+# Print a message indicating the number of stocks to parse
 print(f"Amount of Stocks to parse: {i}\n\nPlease wait, this may take a while...")
 
+# Create a progress bar using the 'alive_bar' library
 with alive_bar(i, force_tty=True) as bar:
+    # Iterate over each stock symbol in the 'symbols' list
     for t in symbols[start_index:]:
+        # Set up an HTTP session using the 'requests' library
         with requests.Session() as s:
+            # Construct the URL for the stock summary page
             url = "https://gurufocus.com/stock/" + t + "/summary"
             headers = {
                 "referer": "referer: https://www.google.com/",
                 "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36"
             }
+            # Send a POST request to the URL
             s.post(url, headers=headers)
+            # Send a GET request to retrieve the stock summary page
             response = s.get(url, headers=headers)
+            # Parse the HTML content using BeautifulSoup
             soup = BeautifulSoup(response.content, 'html.parser')
+            # Initialize a list to store scores related to the stock
             scores = [t]
-        
+
+        # Iterate over each value in the 'ls' list (assuming 'ls' is defined elsewhere)
         for val in ls[1:]:
+            # Sanitize the value (e.g., remove spaces or special characters)
             val = sanitize(val)
+            # Find the score associated with the value on the stock summary page
             score1 = soup.find('a', string=re.compile(val))
             if score1 is not None:
+                # Extract the score from the next table cell
                 score = soup.find('a', string=re.compile(val)).find_next('td').text.strip()
-            else: 
+            else:
+                # If the score is not found, set it to "N/A"
                 score = "N/A"
-            
-            # GF Value
+
+            # Process specific score types (e.g., 'GF Value')
             if val == 'GF Value':
+                # Find relevant elements for 'GF Value'
                 score2 = soup.select('h2 > a', class_="t-h6", string=re.compile(val))
-                i=0
+                i = 0
                 for xt in score2:
                     gf_value = xt.text.strip()
-                    # print(f"GF Value gf_value: {gf_value}!")
                     if gf_value.find(val) != -1:
                         gf_value2 = gf_value.split('\n')
-                        # print(f"GF Value gf_value2: {gf_value2}!")
-                        i+=1
-                if i>0:
-                    gf_value = [x.replace(' ','') for x in gf_value2]
-                    score = gf_value[1].replace('$','')
+                        i += 1
+                if i > 0:
+                    # Extract the numeric value and convert it to a float
+                    gf_value = [x.replace(' ', '') for x in gf_value2]
+                    score = gf_value[1].replace('$', '')
                     score = float(score)
-                    
                 else:
+                    # Set the score to 0 if not found
                     score = 0
-                # print(f"GF Value score: {score}!")     
-              
+
+            # Append the score to the 'scores' list
             scores.append(score)
-            
-        # print(len(df_output))
+
+        # Update the length of the output DataFrame (assuming 'df_output' is defined elsewhere)
         df_len = len(df_output)
-        # print(df_output['GF Value'].loc[df_len-1])
-        # gfvalue1 = df_output['GF Value'].loc[df_len-1]
-        
-        # df_output.loc[len(df_output)] = scores
-        
-        # df_len = len(df_output)
-        # gfvalue2 = df_output['GF Value'].loc[df_len-1]
-      
-        # if gfvalue1 == gf_value2:
-        #     print('Warning!')
-        #     print(df_output['Ticker'].loc[df_len-1])
-        #     print(df_output['GF Value'].loc[df_len-1]) 
+        # Calculate the difference in 'GF Value' and check if it equals 0
         df_output['GF Value'].diff().eq(0)
-        with open(csv_file_path, 'a', newline='') as csvfile:
+        # Write the scores to a CSV file (assuming 'guru_csv_path' is defined elsewhere)
+        with open(guru_csv_path, 'a', newline='') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(scores)
+        # Update the progress bar
         bar()
+
 
 print("\nProcessing is complete.")
 
 # Export the scraped data to Excel file
-df_output.to_excel(output_file_path, index=False)
-print(f"Data were saved to file: {output_file_path}\n")
+df_output.to_excel(guru_xlsx_path, index=False)
+print(f"Data were saved to file: {guru_xlsx_path}\n")
