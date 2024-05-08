@@ -1,25 +1,26 @@
 from openpyxl import load_workbook
-import config
+import config as c
 
-file_gurufocus = config.find_newest_file_simple(config.data_folder_path, config.gurufocus_prefix, config.file_ishares_out_extension)
-file_ishares_out = config.find_newest_file_simple(config.data_folder_path, config.ishares_out_prefix, config.file_ishares_out_extension)
+c.prCyan(f"******** Add Gurufocus sheet to: {c.ishares_out_prefix} ********")
+file_gurufocus = c.find_newest_file_simple(c.data_folder_path, c.gurufocus_prefix, c.file_ishares_out_extension)
+file_ishares_out = c.find_newest_file_simple(c.data_folder_path, c.ishares_out_prefix, c.file_ishares_out_extension)
 
 # Load the source file
 source_workbook = load_workbook(file_gurufocus, read_only=True)
-source_sheet = source_workbook[config.gf_sheet_name]
+source_sheet = source_workbook[c.gf_sheet_name]
 
 # Load the existing file
 existing_workbook = load_workbook(file_ishares_out)
 existing_sheet_names = existing_workbook.sheetnames
 
 # Check if the new sheet name already exists in the existing file
-if config.ishares_gurufocus_sheet_name in existing_sheet_names:
+if c.ishares_gurufocus_sheet_name in existing_sheet_names:
     # Remove the existing sheet before renaming
-    existing_workbook.remove(existing_workbook[config.ishares_gurufocus_sheet_name])
+    existing_workbook.remove(existing_workbook[c.ishares_gurufocus_sheet_name])
 
 # Create a new sheet in the existing file
-existing_workbook.create_sheet(config.ishares_gurufocus_sheet_name)
-existing_sheet = existing_workbook[config.ishares_gurufocus_sheet_name]
+existing_workbook.create_sheet(c.ishares_gurufocus_sheet_name)
+existing_sheet = existing_workbook[c.ishares_gurufocus_sheet_name]
 
 # Copy the source sheet data to the existing sheet
 for row in source_sheet.iter_rows(values_only=True):

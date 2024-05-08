@@ -27,18 +27,20 @@
     # s.post(url, headers=headers)
     # response = s.get(url, headers=headers)
     # soup = BeautifulSoup(response.text, 'html.parser')
-    # print(soup)
+    # c.prCyan(soup)
 # This approach allows you to scrape Google search results after handling the consent form1.
 import pandas as pd
 import csv
-import config
+import config as c
 import requests
 import re
 from bs4 import BeautifulSoup
 from alive_progress import alive_bar
 
+c.prCyan(f"******** Gurufocus parser of Tickers from: {c.ishares_fund_prefix} ********")
+
 # Create file paths
-a, b, guru_csv_path, guru_xlsx_path = config.create_file_paths()
+ishares_fund_csv_path, ishares_out_xlsx_path, guru_csv_path, guru_xlsx_path = c.create_file_paths()
 
 def sanitize(s):
     # Escape meta characters
@@ -47,16 +49,17 @@ def sanitize(s):
         out = out.replace(meta_char, '\\'+meta_char)
     return out
 
-# Get the ishares out excel file
-ishares_out_excel_file = config.find_newest_file_simple(config.data_folder_path, config.ishares_out_prefix, config.file_ishares_out_extension)
+# Get newest ishares out excel file
+ishares_out_excel_file = c.find_newest_file_simple(c.data_folder_path, c.ishares_out_prefix, c.file_ishares_out_extension)
 
 # Read symbols and columns from Excel files
-df_input = pd.read_excel(config.gurufocus_attributes_xlsx)
+df_input = pd.read_excel(c.gurufocus_attributes_xlsx)
 df_symbols = pd.read_excel(ishares_out_excel_file)
-symbols = df_symbols[config.ticker_column_name].tolist()
+symbols = df_symbols[c.ticker_column_name].tolist()
 ls = df_input.columns.tolist()
 print(f"{ls[:5]}...")
 print(f"{symbols[:13]}...")
+
 # Check if CSV file exists
 try:
     df_output = pd.read_csv(guru_csv_path)
@@ -68,16 +71,16 @@ except FileNotFoundError:
 # Determine the start index for parsing
 start_index = len(df_output)
 if start_index > 1:
-    print(f"CONTINUE Parsing from index: {start_index}\n")
+    print(f"Parsing from index: {start_index}")
 
-# Initialize a counter variable 'i'
-i = 0
+number_of_symbols = c.character_count(symbols, start_index)
 
 # Print a message indicating the number of stocks to parse
-print(f"Amount of Stocks to parse: {i}\n\nPlease wait, this may take a while...")
+c.prCyan(f"Amount of Stocks to parse: {number_of_symbols}\n\n")
+print("Please wait, this may take a while...")
 
 # Create a progress bar using the 'alive_bar' library
-with alive_bar(i, force_tty=True) as bar:
+with alive_bar(number_of_symbols, force_tty=True) as bar:
     # Iterate over each stock symbol in the 'symbols' list
     for t in symbols[start_index:]:
         # Set up an HTTP session using the 'requests' library
@@ -144,8 +147,9 @@ with alive_bar(i, force_tty=True) as bar:
         bar()
 
 
-print("\nProcessing is complete.")
+c.prCyan("\nProcessing is complete.")
 
 # Export the scraped data to Excel file
 df_output.to_excel(guru_xlsx_path, index=False)
-print(f"Data were saved to file: {guru_xlsx_path}\n")
+c.prCyan(f"Data were saved to file: ")
+print(f"{guru_xlsx_path}\n")

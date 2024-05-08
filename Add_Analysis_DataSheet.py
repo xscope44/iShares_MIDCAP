@@ -1,21 +1,22 @@
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 from alive_progress import alive_bar
-import config
+import config as c
 
-ishares_out_file = config.find_newest_file_simple(config.data_folder_path, config.ishares_out_prefix, config.file_ishares_out_extension)
+c.prCyan(f"******** Add Analysis sheet: {c.ishares_out_prefix} ********")
+ishares_out_file = c.find_newest_file_simple(c.data_folder_path, c.ishares_out_prefix, c.file_ishares_out_extension)
 
 # Load the existing file
 existing_workbook = load_workbook(ishares_out_file)
-existing_sheet = existing_workbook[config.ishares_gurufocus_sheet_name]
-ishares_sheet = existing_workbook[config.ishares_out_sheet_name]
+existing_sheet = existing_workbook[c.ishares_gurufocus_sheet_name]
+ishares_sheet = existing_workbook[c.ishares_out_sheet_name]
 # Check if the new sheet name already exists
-if config.analysis_sheet_name in existing_workbook.sheetnames:
-    print(f"The sheet '{config.analysis_sheet_name}' already exists in the file.")
+if c.analysis_sheet_name in existing_workbook.sheetnames:
+    print(f"The sheet '{c.analysis_sheet_name}' already exists in the file.")
     # You can handle the situation here, such as renaming or deleting the existing sheet
 else:
 # Create a new sheet
-    new_sheet = existing_workbook.create_sheet(title=config.analysis_sheet_name)
+    new_sheet = existing_workbook.create_sheet(title=c.analysis_sheet_name)
 
     # Copy the first three columns from the first sheet to the new sheet
     for row in ishares_sheet.iter_rows(max_row=ishares_sheet.max_row, max_col=3, values_only=True):
@@ -27,7 +28,7 @@ else:
     new_column_letter = get_column_letter(new_sheet.max_column + 1)
 
     # Set the header for the new column
-    new_sheet[new_column_letter + "1"] = config.price_column_name
+    new_sheet[new_column_letter + "1"] = c.price_column_name
 
     # Apply the formula to the new column
     
@@ -42,7 +43,7 @@ else:
     new_column_letter = get_column_letter(new_sheet.max_column + 1)
 
     # Set the header for the new column
-    new_sheet[new_column_letter + "1"] = config.six_month_price_column_name
+    new_sheet[new_column_letter + "1"] = c.six_month_price_column_name
 
     # Apply the formula to the new column
     for row in range(2, 3):
@@ -56,7 +57,7 @@ else:
     new_column_letter = get_column_letter(new_sheet.max_column + 1)
 
     # Set the header for the new column
-    new_sheet[new_column_letter + "1"] = config.six_month_rps_column_name
+    new_sheet[new_column_letter + "1"] = c.six_month_rps_column_name
 
     # Apply the formula to the new column
     for row in range(2, new_sheet.max_row + 1):
@@ -70,7 +71,7 @@ else:
     new_column_letter = get_column_letter(new_sheet.max_column + 1)
 
     # Set the header for the new column
-    new_sheet[new_column_letter + "1"] = config.upside_potencial_column_name
+    new_sheet[new_column_letter + "1"] = c.upside_potencial_column_name
 
     # Apply the formula to the new column
     for row in range(2, new_sheet.max_row + 1):
@@ -94,7 +95,7 @@ else:
             new_sheet.cell(row=row, column=new_sheet.max_column, value=cell.value)
 
     #### Add GuruFocus collums: ##########################
-    existing_sheet = existing_workbook[config.ishares_gurufocus_sheet_name]
+    existing_sheet = existing_workbook[c.ishares_gurufocus_sheet_name]
         # Get the column letter for the 9th column in the first sheet
     max_col = existing_sheet.max_column
     # print(max_col)
@@ -113,3 +114,4 @@ else:
     # Save the changes to the existing file
     existing_workbook.save(ishares_out_file)
     existing_workbook.close()
+    

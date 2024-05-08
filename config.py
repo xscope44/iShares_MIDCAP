@@ -30,6 +30,51 @@ from datetime import datetime, date
 import pandas as pd
 import csv
 
+# Define print colors functions:
+def prRed(skk): print("\033[91m {}\033[00m" .format(skk))
+ 
+ 
+def prGreen(skk): print("\033[92m {}\033[00m" .format(skk))
+ 
+ 
+def prYellow(skk): print("\033[93m {}\033[00m" .format(skk))
+ 
+ 
+def prLightPurple(skk): print("\033[94m {}\033[00m" .format(skk))
+ 
+ 
+def prPurple(skk): print("\033[95m {}\033[00m" .format(skk))
+ 
+ 
+def prCyan(skk): print("\033[96m {}\033[00m" .format(skk))
+ 
+ 
+def prLightGray(skk): print("\033[97m {}\033[00m" .format(skk))
+ 
+ 
+def prBlack(skk): print("\033[98m {}\033[00m" .format(skk))
+
+def character_count(text, start_index):
+  """
+  This function calculates the number of characters in a string after slicing it from a specific starting point.
+
+  Args:
+    text: The string you want to analyze.
+    start_index: An integer representing the index from where the slicing should start.
+
+  Returns:
+    An integer representing the number of characters in the sliced string.
+  """
+
+  if start_index < 0:
+    raise ValueError("Index cannot be negative.")
+
+  if start_index >= len(text):
+    return 0
+
+  return len(text[start_index:])
+
+# Generate filenames and relative or full path to the data files: ishares_fund_csv_path, ishares_out_xlsx_path, guru_csv_path, guru_xlsx_path
 def create_file_paths():
     # Generate the current date in the format "yyyymmdd"
     current_date = date.today().strftime("%Y%m%d")
@@ -66,7 +111,7 @@ def find_newest_file(data_folder_path, file_input_prefix, file_input_extension, 
     # Sort files by modification time in descending order
     files.sort(key=lambda f: os.path.getmtime(os.path.join(data_folder_path, f)), reverse=True)
 
-    print(f"iShares files matching criteria: \n{files}\n")
+    #prCyan(f"iShares files matching criteria: \n{files}\n")
     # Get the newest file
     newest_file = files[0]
 
@@ -103,13 +148,15 @@ def find_newest_file_simple(data_folder_path, file_input_prefix, file_input_exte
     # Sort files by modification time in descending order
     files.sort(key=lambda f: os.path.getmtime(os.path.join(data_folder_path, f)), reverse=True)
 
-    print(f"Newest files matching criteria: \n{files}\n")
+    #prCyan(f"Newest files matching criteria: \n")
+    #print(f"{files}\n")
     # Get the newest file
     newest_file = files[0]
 
     # Construct the full file path
     source_file = os.path.join(data_folder_path, newest_file)
-    print(f"Newest one:\n{source_file}\n")
+    prCyan(f"Newest one:")
+    print(f"{source_file}\n")
 
     return source_file
 
