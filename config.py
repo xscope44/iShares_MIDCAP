@@ -7,7 +7,7 @@ ishares_out_prefix = "iShares-Russell-Mid-Cap-Value-ETF_Out"
 gurufocus_prefix = "iShares-Russell-Mid-Cap-Value-ETF_Guru"
 gurufocus_attributes_xlsx = 'GuruFocus_attributes.xlsx'
 
-ishares_manual_fund_csv = 'iShares-Russell-Mid-Cap-ETF_fund_20240428.csv'
+ishares_manual_fund_csv = 'iShares-Russell-Mid-Cap-Value-ETF_fund_20240508.csv'
 manual_download = False
 
 file_ishares_init_extension = ".xls"

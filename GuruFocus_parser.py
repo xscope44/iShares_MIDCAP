@@ -38,6 +38,8 @@ from bs4 import BeautifulSoup
 from alive_progress import alive_bar
 
 c.prCyan(f"******** Gurufocus parser of Tickers from: {c.ishares_fund_prefix} ********")
+# ls_special=['Debt-to-EBITDA','Gross Margin %','PE Ratio','Financial Strength','Profitability Rank']
+ls_special=['Cash-To-Debt', 'Equity-to-Asset', 'Debt-to-Equity', 'Debt-to-EBITDA', 'Interest Coverage', 'Piotroski F-Score', 'Altman Z-Score', 'Beneish M-Score', 'WACC vs ROIC', '3-Year Revenue Growth Rate', '3-Year Book Growth Rate', 'Future 3-5Y EPS without NRI Growth Rate', 'Future 3-5Y Total Revenue Growth Rate', '5-Day RSI', '9-Day RSI', '14-Day RSI', '6-1 Month Momentum %', '12-1 Month Momentum %', 'Current Ratio', 'Quick Ratio', 'Cash Ratio', 'Days Inventory', 'Days Sales Outstanding', 'Days Payable', 'Dividend Yield %', 'Dividend Payout Ratio', '3-Year Dividend Growth Rate', 'Forward Dividend Yield %', '5-Year Yield-on-Cost %', '3-Year Average Share Buyback Ratio', 'Shareholder Yield %', 'Gross Margin %', 'Operating Margin %', 'Net Margin %', 'FCF Margin %', 'ROE %', 'ROA %', 'ROIC %', 'ROC (Joel Greenblatt) %', 'ROCE %', 'Years of Profitability over Past 10-Year', 'PE Ratio', 'Forward PE Ratio', 'PE Ratio without NRI', 'Shiller PE Ratio', 'Price-to-Owner-Earnings', 'PS Ratio', 'PB Ratio', 'Price-to-Tangible-Book', 'Price-to-Free-Cash-Flow', 'Price-to-Operating-Cash-Flow', 'EV-to-EBIT', 'EV-to-Forward-EBIT', 'EV-to-EBITDA', 'EV-to-Forward-EBITDA', 'EV-to-Revenue', 'EV-to-Forward-Revenue', 'EV-to-FCF', 'Price-to-Projected-FCF', 'Price-to-Median-PS-Value', 'Price-to-Graham-Number', 'Earnings Yield (Greenblatt) %', 'FCF Yield %', 'Forward Rate of Return (Yacktman) %', 'Financial Strength', 'Growth Rank', 'Momentum Rank', 'Profitability Rank', 'GF Value Rank']
 
 # Create file paths
 ishares_fund_csv_path, ishares_out_xlsx_path, guru_csv_path, guru_xlsx_path = c.create_file_paths()
@@ -99,41 +101,56 @@ with alive_bar(number_of_symbols, force_tty=True) as bar:
             soup = BeautifulSoup(response.content, 'html.parser')
             # Initialize a list to store scores related to the stock
             scores = [t]
+            # Iterate over each value in the 'ls' list (assuming 'ls' is defined elsewhere)
+            for val in ls[1:]:
+                # Sanitize the value (e.g., remove spaces or special characters)
+                val = sanitize(val)
 
-        # Iterate over each value in the 'ls' list (assuming 'ls' is defined elsewhere)
-        for val in ls[1:]:
-            # Sanitize the value (e.g., remove spaces or special characters)
-            val = sanitize(val)
-            # Find the score associated with the value on the stock summary page
-            score1 = soup.find('a', string=re.compile(val))
-            if score1 is not None:
-                # Extract the score from the next table cell
-                score = soup.find('a', string=re.compile(val)).find_next('td').text.strip()
-            else:
-                # If the score is not found, set it to "N/A"
-                score = "N/A"
+                if val in ls_special:
+                        # Find the score associated with the value on the stock summary page using css
+                        measures = [mea.text.strip() for mea in soup.select('td.t-caption > a')]
+                        vals = [va.text.strip() for va in soup.select('td.t-caption span.p-l-sm') ]
+                        measures2 = [mea.text.strip() for mea in soup.select('h2.t-h6 >a')]
+                        vals2 = [va.text.strip() for va in soup.select('div.flex.flex-center span.t-body-sm.m-l-md')]
 
-            # Process specific score types (e.g., 'GF Value')
-            if val == 'GF Value':
-                # Find relevant elements for 'GF Value'
-                score2 = soup.select('h2 > a', class_="t-h6", string=re.compile(val))
-                i = 0
-                for xt in score2:
-                    gf_value = xt.text.strip()
-                    if gf_value.find(val) != -1:
-                        gf_value2 = gf_value.split('\n')
-                        i += 1
-                if i > 0:
-                    # Extract the numeric value and convert it to a float
-                    gf_value = [x.replace(' ', '') for x in gf_value2]
-                    score = gf_value[1].replace('$', '')
-                    score = float(score)
-                else:
-                    # Set the score to 0 if not found
-                    score = 0
+                        all_meas = measures + measures2
+                        all_vals = vals + vals2
+                        
+                        for m,v in zip(all_meas,all_vals):
+                            if m == val:
+                                score = v
+                                # print(f"{m}:{score}")
+                else:        
+                    # Find the score associated with the value on the stock summary page
+                    score1 = soup.find('a', string=re.compile(val))
+                    if score1 is not None:
+                        # Extract the score from the next table cell
+                        score = soup.find('a', string=re.compile(val)).find_next('td').text.strip()
+                    else:
+                        # If the score is not found, set it to "N/A"
+                        score = "N/A"
 
-            # Append the score to the 'scores' list
-            scores.append(score)
+                # Process specific score types (e.g., 'GF Value')
+                if val == 'GF Value':
+                    # Find relevant elements for 'GF Value'
+                    score2 = soup.select('h2 > a', class_="t-h6", string=re.compile(val))
+                    i = 0
+                    for xt in score2:
+                        gf_value = xt.text.strip()
+                        if gf_value.find(val) != -1:
+                            gf_value2 = gf_value.split('\n')
+                            i += 1
+                    if i > 0:
+                        # Extract the numeric value and convert it to a float
+                        gf_value = [x.replace(' ', '') for x in gf_value2]
+                        score = gf_value[1].replace('$', '')
+                        score = float(score)
+                    else:
+                        # Set the score to 0 if not found
+                        score = 0
+                        
+                # Append the score to the 'scores' list
+                scores.append(score)
 
         # Update the length of the output DataFrame (assuming 'df_output' is defined elsewhere)
         df_len = len(df_output)

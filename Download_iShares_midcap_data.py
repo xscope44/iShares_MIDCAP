@@ -31,10 +31,19 @@ if not c.manual_download:
         if worksheet['ss:Name'] == 'Holdings': 
             rows = worksheet.selects('ss:Row').selects('ss:Cell>text()') # Get all rows
             utils.save2csv(fund_csv_path, rows) # Save Holdings sheet data to csv
-else: 
-    fund_csv_path = c.ishares_manual_fund_csv
-print (f"{fund_csv_path} has been saved successfully!\n")
+    print (f"{fund_csv_path} has been saved successfully!\n")
+else:
+     # Join the folder path with the file names
+    ishares_fund_csv_path = os.path.join(c.data_folder_path, c.ishares_manual_fund_csv)
+    try:
+        with open(ishares_fund_csv_path, 'r') as f:
+            fund_csv_path = ishares_fund_csv_path
+            print (f"{ishares_fund_csv_path} has been loaded successfully!\n")
 
+    except FileNotFoundError:
+        c.prRed(f"{ishares_fund_csv_path} does not exist.")
+        c.prRed("Make sure the file exists and is defined correctly in config file")
+        exit
 # Convert Holding sheet csv to excel
 c.prCyan ("Converted csv to excel:\n")
 read_file = pd.read_csv(fund_csv_path, delimiter=',', encoding = 'utf-8', on_bad_lines = 'skip', low_memory = False, skiprows=13)
@@ -45,4 +54,4 @@ read_file.to_excel(output_file_path,sheet_name=c.ishares_out_sheet_name ,index=N
 # c.convert_csv_to_excel(fund_csv_path, output_file_path, c.ishares_out_sheet_name)
 # c.prCyan(f"Downloaded {fund_csv} has been successfully converted to {output_xlsx}\n")
 print(output_file_path)
-c.prCyan("*********************************************************************************************\n")
+exit
